@@ -2,5 +2,5 @@
 This repository contains learning material and code used for scRNA-Seq analysis.
 
 Tutorials:
-https://satijalab.org/seurat/
-https://broadinstitute.github.io/2019_scWorkshop/index.html
+1. https://satijalab.org/seurat/
+2. https://broadinstitute.github.io/2019_scWorkshop/index.html
