@@ -1,5 +1,5 @@
 ---
-title: "scRNA-Seq on WT and Fbw7-/- U5-NSC"
+title: "scRNA-Seq on WT and Fbw7-deleted U5-NSC"
 output: html_notebook
 ---
 
