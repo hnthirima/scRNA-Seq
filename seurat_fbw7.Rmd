@@ -3,24 +3,21 @@ title: "scRNA-Seq on WT and Fbw7-deleted U5-NSC"
 output: html_notebook
 ---
 
-
-
 ```{r}
 library(Seurat)
 library(SeuratDisk)
 library(ggplot2)
 
 setwd("~/count/Fbw7_aggr/outs/raw_feature_bc_matrix/")
-
 ```
 
-
+```{r}
 #mtx_obj <- ReadMtx(mtx = "matrix.mtx.gz",
 #                   features = "features.tsv.gz",
 #                   cells = "barcodes.tsv.gz")
 #seurat_mtx <- CreateSeuratObject(counts = mtx_obj, project = "NSC_Fbw7", min.cells = 3, min.features = 200)
 #str(seurat_mtx)
-
+```
 
 ```{r}
 hd5_obj <- Read10X_h5(filename = "../raw_feature_bc_matrix.h5")
@@ -50,14 +47,14 @@ FeatureScatter(fbw7_obj, feature1 = "nFeature_RNA", "nCount_RNA") +
 fbw7_obj <- subset(fbw7_obj, subset = nFeature_RNA > 200 & nFeature_RNA < 6000 & percent.mito < 5)
 ```
 
-```{r}
 #Normalization
+```{r}
 fbw7_obj <- NormalizeData(fbw7_obj)
 str(fbw7_obj)
 ```
 
-```{r}
 # Identify highly variable features
+```{r}
 fbw7_obj <- FindVariableFeatures(fbw7_obj, selection.method = "vst", nfeatures = 2000)
 
 top10 <- head(VariableFeaturePlot(fbw7_obj), 10)
@@ -69,8 +66,8 @@ Var_plot2 <- LabelPoints(plot = Var_plot, points = rownames(top10), repel = TRUE
 Var_plot2
 ```
 
+#Scaling
 ```{r}
-#scaling 
 #needs to be done dimensional reduction techniques
 #mean expression across cells would be 0
 #variance across cells would be 1 
@@ -80,13 +77,11 @@ Var_plot2
 
 all.genes <- rownames(fbw7_obj)
 fbw7_obj <- ScaleData(fbw7_obj, features = all.genes)
-
-
 ```
 
 
 ```{r}
- fbw7_obj <- RunPCA(fbw7_obj, features = VariableFeatures(object = fbw7_obj))
+fbw7_obj <- RunPCA(fbw7_obj, features = VariableFeatures(object = fbw7_obj))
 
 DimPlot(fbw7_obj, reduction = "pca") + NoLegend()
 DimHeatmap(fbw7_obj, dims = 1, cells = 500, balanced = TRUE)
