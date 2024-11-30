@@ -26,8 +26,8 @@ fbw7_obj <- CreateSeuratObject(counts = hd5_obj, project = "NSC_Fbw7", min.cells
 fbw7_obj #17968 features across 6927 samples
 ```
 
-#QC
-#percent mito genes
+# QC
+percent mito genes
 ```{r}
 View(fbw7_obj@meta.data)
 fbw7_obj[["percent.mito"]] <- PercentageFeatureSet(fbw7_obj, pattern = "^MT-")
@@ -42,12 +42,12 @@ FeatureScatter(fbw7_obj, feature1 = "nFeature_RNA", "nCount_RNA") +
   geom_smooth(method = "lm")
 ```
 
-#Filtering
+# Filtering
 ```{r}
 fbw7_obj <- subset(fbw7_obj, subset = nFeature_RNA > 200 & nFeature_RNA < 6000 & percent.mito < 5)
 ```
 
-#Normalization
+# Normalization
 ```{r}
 fbw7_obj <- NormalizeData(fbw7_obj)
 str(fbw7_obj)
@@ -66,15 +66,15 @@ Var_plot2 <- LabelPoints(plot = Var_plot, points = rownames(top10), repel = TRUE
 Var_plot2
 ```
 
-#Scaling
-```{r}
-#needs to be done dimensional reduction techniques
-#mean expression across cells would be 0
-#variance across cells would be 1 
-#by default only variable features are scaled
-#you can specify the features argument to scale additional features
-#see SCTransform() for advance options
+# Scaling
+-needs to be done dimensional reduction techniques
+-mean expression across cells would be 0
+-variance across cells would be 1 
+-by default only variable features are scaled
+-you can specify the features argument to scale additional features
+-see SCTransform() for advance options
 
+```{r}
 all.genes <- rownames(fbw7_obj)
 fbw7_obj <- ScaleData(fbw7_obj, features = all.genes)
 ```
@@ -87,12 +87,12 @@ DimPlot(fbw7_obj, reduction = "pca") + NoLegend()
 DimHeatmap(fbw7_obj, dims = 1, cells = 500, balanced = TRUE)
 ```
 
+# detect doublets
 ```{r}
-#detect doublets
 remotes::install_github('chris-mcginnis-ucsf/DoubletFinder')
 library(DoubletFinder)
 
-fbw7_obj <- doubletFinder(fbw7_obj, PCs = 1:10 )
+fbw7_obj <- doubletFinder(fbw7_obj, PCs = 1:10 )  #re-check code
 ```
 
 
@@ -106,6 +106,7 @@ fbw7_obj <- FindNeighbors(fbw7_obj, dims = 1:10)
 fbw7_obj <- FindClusters(fbw7_obj, resolution = 0.5)
 head(Idents(fbw7_obj), 5)
 ```
+
 ```{r}
 fbw7_obj <- RunUMAP(fbw7_obj, dims = 1:10)
 DimPlot(fbw7_obj, reduction = "umap")
