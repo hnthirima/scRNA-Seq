@@ -14,33 +14,29 @@ setwd("~/count/Fbw7_aggr/outs/raw_feature_bc_matrix/")
 
 ```
 
-```{r}
+
 #mtx_obj <- ReadMtx(mtx = "matrix.mtx.gz",
 #                   features = "features.tsv.gz",
 #                   cells = "barcodes.tsv.gz")
 #seurat_mtx <- CreateSeuratObject(counts = mtx_obj, project = "NSC_Fbw7", min.cells = 3, min.features = 200)
 #str(seurat_mtx)
-```
+
 
 ```{r}
 hd5_obj <- Read10X_h5(filename = "../raw_feature_bc_matrix.h5")
 str(hd5_obj)
 fbw7_obj <- CreateSeuratObject(counts = hd5_obj, project = "NSC_Fbw7", min.cells = 3, min.features = 200)
 fbw7_obj #17968 features across 6927 samples
-
 ```
 
-
-```{r}
 #QC
-View(fbw7_obj@meta.data)
 #percent mito genes
+```{r}
+View(fbw7_obj@meta.data)
 fbw7_obj[["percent.mito"]] <- PercentageFeatureSet(fbw7_obj, pattern = "^MT-")
 View(fbw7_obj@meta.data)
 
 VlnPlot(fbw7_obj, features = c("nFeature_RNA", "nCount_RNA", "percent.mito"), ncol = 3)
-
-
 ```
 
 
@@ -49,8 +45,8 @@ FeatureScatter(fbw7_obj, feature1 = "nFeature_RNA", "nCount_RNA") +
   geom_smooth(method = "lm")
 ```
 
-```{r}
 #Filtering
+```{r}
 fbw7_obj <- subset(fbw7_obj, subset = nFeature_RNA > 200 & nFeature_RNA < 6000 & percent.mito < 5)
 ```
 
