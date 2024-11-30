@@ -12,4 +12,4 @@ This method determined developmental cell types enriched in each meningioma subt
 Single-cell RNASeq data from many developmental stages in mouse embryos were collected from the Shendure Lab at the University of Washington (Cao et al., 2023)
 
 ### seurat_fbw7.Rmd
-Basic Seurat script for analyzing scRNA-Seq Cell Ranger output. 
+Basic Seurat script for analyzing Cell Ranger output. 
