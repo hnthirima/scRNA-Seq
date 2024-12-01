@@ -14,5 +14,5 @@ Single-cell RNASeq data from many developmental stages in mouse embryos were col
 ### seurat_fbw7.Rmd
 Basic Seurat script for analyzing Cell Ranger output. 
 
-### sahm_scRNA.R
+### sahm_men_scRNA.R
 Analyze scRNA-Seq data from meningioma tumors to differentiate tumor vs immune cells. 
