@@ -1,0 +1,113 @@
+---
+title: "scRNA-Seq on WT and Fbw7-/- U5-NSC"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+  
+```{r}
+library(Seurat)
+library(SeuratDisk)
+library(ggplot2)
+
+```
+  
+
+```{r}
+setwd("/Analysis/count/Fbw7_WT/outs/")
+WTfbw7_hd5obj <- Read10X_h5(filename = "filtered_feature_bc_matrix.h5")
+str(WTfbw7_hd5obj)
+
+WTfbw7_obj <- CreateSeuratObject(counts = WTfbw7_hd5obj, project = "NSC_Fbw7" )
+WTfbw7_obj$genotype <- "WT"
+```
+
+
+
+```{r}
+setwd("/Analysis/count/Fbw7_KO/outs/")
+KOfbw7_hd5obj <- Read10X_h5(filename = "filtered_feature_bc_matrix.h5")
+str(KOfbw7_hd5obj)
+
+KOfbw7_obj <- CreateSeuratObject(counts = KOfbw7_hd5obj, project = "NSC_Fbw7")
+KOfbw7_obj$genotype <- "KO"
+```
+
+Merge (not integrate!) Seurat objects to perform QC
+```{r}
+merge_seurat <- merge(WTfbw7_obj, KOfbw7_obj)
+
+unique(merge_seurat@meta.data$genotype)
+
+merge_seurat$mitoPercent <- PercentageFeatureSet(merge_seurat, pattern = "^MT-")
+
+VlnPlot(merge_seurat, features = c("nFeature_RNA", "nCount_RNA", "mitoPercent"), ncol = 3)
+
+```
+
+
+```{r}
+FeatureScatter(merge_seurat, feature1 = "nFeature_RNA", "nCount_RNA") +
+  geom_smooth(method = "lm")
+```
+
+```{r}
+#Filtering
+merge_seurat_filtered <- subset(merge_seurat, subset = nFeature_RNA > 1000 & nCount_RNA > 800 & mitoPercent < 10)
+```
+
+
+Before integration - do we see a batch effect?
+```{r}
+merge_seurat_filtered <- NormalizeData(object = merge_seurat_filtered)
+merge_seurat_filtered <- FindVariableFeatures(object = merge_seurat_filtered)
+merge_seurat_filtered <- ScaleData(object = merge_seurat_filtered)
+merge_seurat_filtered <- RunPCA(object = merge_seurat_filtered)
+ElbowPlot(merge_seurat_filtered)
+merge_seurat_filtered <- FindNeighbors(object = merge_seurat_filtered, dims = 1:20)
+
+merge_seurat_filtered <- FindClusters(object = merge_seurat_filtered)
+merge_seurat_filtered <- RunUMAP(object = merge_seurat_filtered, dims = 1:20)
+```
+
+Plot
+```{r}
+DimPlot(merge_seurat_filtered, reduction = 'umap', group.by = "genotype")
+```
+Integration to correct for batch effect
+```{r}
+obj.list <- SplitObject(merge_seurat_filtered, split.by = "genotype")
+
+for ( i in 1:length(obj.list)){
+  obj.list[[i]] <- NormalizeData(object = obj.list[[i]])
+  obj.list[[i]] <- FindVariableFeatures(object = obj.list[[i]])
+}
+
+#select integration features from object list
+features <- SelectIntegrationFeatures(object.list = obj.list)
+
+#find integration anchors (CCA) 
+anchors <- FindIntegrationAnchors(object.list = obj.list, 
+                       anchor.features = features)
+
+#integrate data
+seurat.integrated <- IntegrateData(anchorset = anchors)
+
+#scale data, run PCA and UMAP and visualize integrated data
+seurat.integrated <- ScaleData(object = seurat.integrated)
+seurat.integrated <- RunPCA(object = seurat.integrated)
+seurat.integrated <- RunUMAP(object = seurat.integrated, dims = 1:50) #arbitrarily used 50 dimensions
+```
+
+Plot
+```{r}
+DimPlot(seurat.integrated, reduction = 'umap', group.by = "genotype")
+```
+
+
+
+```{r}
+saveRDS(seurat.integrated, file = "scRNAseq_fbw7_integrated.rds")
+```
+
