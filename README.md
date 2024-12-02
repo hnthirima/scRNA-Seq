@@ -16,3 +16,6 @@ Basic Seurat script for analyzing Cell Ranger output.
 
 ### sahm_men_scRNA.R
 Analyze scRNA-Seq data from meningioma tumors to differentiate tumor vs immune cells. 
+
+### seurat_integration.Rmd
+Basic Seurat script for integrating samples to remove batch effects. 
